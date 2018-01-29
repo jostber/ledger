@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -181,6 +181,7 @@ public:
   value_t fn_abs(call_scope_t& scope);
   value_t fn_justify(call_scope_t& scope);
   value_t fn_quoted(call_scope_t& scope);
+  value_t fn_quoted_rfc4180(call_scope_t& scope);
   value_t fn_join(call_scope_t& scope);
   value_t fn_format_date(call_scope_t& scope);
   value_t fn_format_datetime(call_scope_t& scope);
@@ -403,6 +404,7 @@ public:
   OPTION(report_t, auto_match);
 
   OPTION_(report_t, average, DO() { // -A
+      OTHER(empty).on(whence);
       OTHER(display_total_)
         .on(whence, "count>0?(display_total/count):0");
     });
@@ -457,12 +459,12 @@ public:
   (report_t, budget_format_,
    CTOR(report_t, budget_format_) {
     on(none,
-       "%(justify(scrub(get_at(display_total, 0)), 12, -1, true, color))"
-       " %(justify(-scrub(get_at(display_total, 1)), 12, "
-       "           12 + 1 + 12, true, color))"
-       " %(justify(scrub(get_at(display_total, 1) + "
-       "                 get_at(display_total, 0)), 12, "
-       "           12 + 1 + 12 + 1 + 12, true, color))"
+       "%(justify(scrub(get_at(display_total, 0)), int(amount_width), -1, true, color))"
+       " %(justify(-scrub(get_at(display_total, 1)), int(amount_width), "
+       "           int(amount_width) + 1 + int(amount_width), true, color))"
+       " %(justify(scrub((get_at(display_total, 1) || 0) + "
+       "                 (get_at(display_total, 0) || 0)), int(amount_width), "
+       "           int(amount_width) + 1 + int(amount_width) + 1 + int(amount_width), true, color))"
        " %(ansify_if("
        "   justify((get_at(display_total, 1) ? "
        "            (100% * quantity(scrub(get_at(display_total, 0)))) / "
@@ -792,7 +794,8 @@ public:
 
   OPTION(report_t, output_); // -o
 
-#if HAVE_ISATTY
+// setenv() is not available on WIN32
+#if defined(HAVE_ISATTY) and !defined(_WIN32) and !defined(__CYGWIN__)
   OPTION__
   (report_t, pager_,
    CTOR(report_t, pager_) {

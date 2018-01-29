@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -136,9 +136,7 @@ void global_scope_t::read_init()
   path init_file;
   if (HANDLED(init_file_)) {
     init_file=HANDLER(init_file_).str();
-    if (exists(init_file)) {
-      parse_init(init_file);
-    } else {
+    if (!exists(init_file)) {
       throw_(parse_error, _f("Could not find specified init file %1%") % init_file);
     }
   } else {
@@ -451,7 +449,7 @@ expr_t::func_t global_scope_t::look_for_command(scope_t&      scope,
 
 void global_scope_t::visit_man_page() const
 {
-#ifndef WIN32
+#if !defined(_WIN32) && !defined(__CYGWIN__)
   int pid = fork();
   if (pid < 0) {
     throw std::logic_error(_("Failed to fork child process"));

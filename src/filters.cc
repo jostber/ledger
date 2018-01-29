@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -154,7 +154,7 @@ void truncate_xacts::operator()(post_t& post)
 void sort_posts::post_accumulated_posts()
 {
   std::stable_sort(posts.begin(), posts.end(),
-                   compare_items<post_t>(sort_order));
+                   compare_items<post_t>(sort_order, report));
 
   foreach (post_t * post, posts) {
     post->xdata().drop_flags(POST_EXT_SORT_CALC);
@@ -982,10 +982,12 @@ void interval_posts::flush()
   std::stable_sort(all_posts.begin(), all_posts.end(),
                    sort_posts_by_date());
 
-  // Determine the beginning interval by using the earliest post
-  if (all_posts.size() > 0 && all_posts.front() &&
-      ! interval.find_period(all_posts.front()->date()))
-    throw_(std::logic_error, _("Failed to find period for interval report"));
+  // only if the interval has no start use the earliest post
+  if (!(interval.begin() && interval.find_period(*interval.begin())))
+    // Determine the beginning interval by using the earliest post
+    if (all_posts.size() > 0 && all_posts.front()
+        && !interval.find_period(all_posts.front()->date()))
+      throw_(std::logic_error, _("Failed to find period for interval report"));
 
   // Walk the interval forward reporting all posts within each one
   // before moving on, until we reach the end of all_posts

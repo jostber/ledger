@@ -66,6 +66,16 @@ class BoostInfo(object):
         if system == 'centos':
             return [ 'boost-devel' ]
 
+        elif system == 'ubuntu-xenial':
+            return [ 'libboost-dev',
+                     'libboost-date-time-dev',
+                     'libboost-filesystem-dev',
+                     'libboost-iostreams-dev',
+                     'libboost-python-dev',
+                     'libboost-regex-dev',
+                     'libboost-system-dev',
+                     'libboost-test-dev' ]
+
         elif system == 'ubuntu-trusty':
             return [ 'libboost-dev',
                      'libboost-date-time-dev',
@@ -484,7 +494,7 @@ class PrepareBuild(CommandLineApp):
 
     def phase_sloc(self, *args):
         self.log.info('Executing phase: sloc')
-        self.execute('sloccount', 'src', 'python', 'lisp', 'test')
+        self.execute('sloccount', 'src', 'python', 'test')
 
     #########################################################################
     # Update local files with the latest information                        #
@@ -516,7 +526,7 @@ class PrepareBuild(CommandLineApp):
                     'libiconv', '+universal',
                     'zlib', '+universal',
                     'gmp' ,'+universal', 'mpfr', '+universal',
-                    'ncurses', '+universal', 'ncursesw', '+universal',
+                    'ncurses', '+universal',
                     'gettext' ,'+universal',
                     'libedit' ,'+universal',
                     'texlive-xetex', 'doxygen', 'graphviz', 'texinfo',
@@ -565,6 +575,26 @@ class PrepareBuild(CommandLineApp):
                             'libutfcpp-dev',
                             'sloccount'
                         ] + BoostInfo().dependencies('ubuntu-trusty')
+                    elif re.search('xenial', info):
+                        self.log.info('Looks like you are using APT on Ubuntu Xenial')
+                        packages = [
+                            'sudo', 'apt-get', 'install',
+                            'build-essential',
+                            'doxygen',
+                            'cmake',
+                            'ninja-build',
+                            'zlib1g-dev',
+                            'libbz2-dev',
+                            'python-dev',
+                            'libgmp3-dev',
+                            'libmpfr-dev',
+                            'gettext',
+                            'libedit-dev',
+                            'texinfo',
+                            'lcov',
+                            'libutfcpp-dev',
+                            'sloccount'
+                        ] + BoostInfo().dependencies('ubuntu-xenial')
                     elif re.search('saucy', info):
                         self.log.info('Looks like you are using APT on Ubuntu Saucy')
                         packages = [

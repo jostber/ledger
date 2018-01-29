@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 #include "output.h"
 #include "xact.h"
 #include "post.h"
+#include "item.h"
 #include "account.h"
 #include "session.h"
 #include "report.h"
@@ -281,8 +282,23 @@ void format_accounts::operator()(account_t& account)
 void report_accounts::flush()
 {
   std::ostream& out(report.output_stream);
+  format_t      prepend_format;
+  std::size_t   prepend_width;
+
+  if (report.HANDLED(prepend_format_)) {
+    prepend_format.parse_format(report.HANDLER(prepend_format_).str());
+    prepend_width = report.HANDLED(prepend_width_)
+      ? lexical_cast<std::size_t>(report.HANDLER(prepend_width_).str())
+      : 0;
+  }
 
   foreach (accounts_pair& entry, accounts) {
+    if (prepend_format) {
+      bind_scope_t bound_scope(report, *entry.first);
+      out.width(static_cast<std::streamsize>(prepend_width));
+      out << prepend_format(bound_scope);
+    }
+
     if (report.HANDLED(count))
       out << entry.second << ' ';
     out << *entry.first << '\n';
@@ -329,21 +345,27 @@ void report_tags::flush()
   }
 }
 
+void report_tags::gather_metadata(item_t& item)
+{
+  if (! item.metadata)
+    return;
+  foreach (const item_t::string_map::value_type& data, *item.metadata) {
+    string tag(data.first);
+    if (report.HANDLED(values) && data.second.first)
+      tag += ": " + data.second.first.get().to_string();
+
+    std::map<string, std::size_t>::iterator i = tags.find(tag);
+    if (i == tags.end())
+      tags.insert(tags_pair(tag, 1));
+    else
+      (*i).second++;
+  }
+}
+
 void report_tags::operator()(post_t& post)
 {
-  if (post.metadata) {
-    foreach (const item_t::string_map::value_type& data, *post.metadata) {
-      string tag=data.first;
-      if (report.HANDLED(values) && (data.second).first) {
-	tag+=": "+ (data.second).first.get().to_string();
-      }
-      std::map<string, std::size_t>::iterator i = tags.find(tag);
-      if (i == tags.end())
-	tags.insert(tags_pair(tag, 1));
-      else
-	(*i).second++;
-    }
-  }
+  gather_metadata(*post.xact);
+  gather_metadata(post);
 }
 
 void report_commodities::flush()

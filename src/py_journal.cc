@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -135,6 +135,11 @@ namespace {
     return journal.find_account(name, auto_create);
   }
 
+  account_t * py_register_account(journal_t& journal, const string& name, post_t* post)
+  {
+    return journal.register_account(name, post, journal.master);
+  }
+
 #if 0
   std::size_t py_read(journal_t& journal, const string& pathname)
   {
@@ -232,9 +237,6 @@ void export_journal()
           boost::noncopyable >("PostHandler")
     ;
 
-#if BOOST_VERSION >= 106000
-  python::register_ptr_to_python< shared_ptr<collector_wrapper> >();
-#endif
   class_< collector_wrapper, shared_ptr<collector_wrapper>,
           boost::noncopyable >("PostCollectorWrapper", no_init)
     .def("__len__", &collector_wrapper::length)
@@ -286,6 +288,14 @@ void export_journal()
          return_internal_reference<1,
              with_custodian_and_ward_postcall<1, 0> >())
     .def("find_account_re", &journal_t::find_account_re,
+         return_internal_reference<1,
+             with_custodian_and_ward_postcall<1, 0> >())
+
+    .def("register_account", py_register_account,
+         return_internal_reference<1,
+             with_custodian_and_ward_postcall<1, 0> >())
+
+    .def("expand_aliases", &journal_t::expand_aliases,
          return_internal_reference<1,
              with_custodian_and_ward_postcall<1, 0> >())
 

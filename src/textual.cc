@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -567,6 +567,9 @@ void instance_t::automated_xact_directive(char * line)
     expr_t::ptr_op_t expr =
       query.parse_args(string_value(skip_ws(line + 1)).to_sequence(),
                        keeper, false, true);
+    if (!expr) {
+      throw parse_error(_("Expected predicate after '='"));
+    }
 
     unique_ptr<auto_xact_t> ae(new auto_xact_t(predicate_t(expr, keeper)));
     ae->pos           = position_t();
@@ -725,15 +728,12 @@ void instance_t::include_directive(char * line)
   if (line[0] != '/' && line[0] != '\\' && line[0] != '~') {
     DEBUG("textual.include", "received a relative path");
     DEBUG("textual.include", "parent file path: " << context.pathname);
-    string pathstr(context.pathname.string());
-    string::size_type pos = pathstr.rfind('/');
-    if (pos == string::npos)
-      pos = pathstr.rfind('\\');
-    if (pos != string::npos) {
-      filename = path(string(pathstr, 0, pos + 1)) / line;
-      DEBUG("textual.include", "normalized path: " << filename.string());
-    } else {
+    path parent_path = context.pathname.parent_path();
+    if (parent_path.empty()) {
       filename = path(string(".")) / line;
+    } else {
+      filename = parent_path / line;
+      DEBUG("textual.include", "normalized path: " << filename.string());
     }
   } else {
     filename = line;
@@ -1132,6 +1132,7 @@ void instance_t::commodity_format_directive(commodity_t&, string format)
   trim(format);
   amount_t amt;
   amt.parse(format);
+  amt.commodity().add_flags(COMMODITY_STYLE_NO_MIGRATE);
   VERIFY(amt.valid());
 }
 
@@ -1662,7 +1663,8 @@ post_t * instance_t::parse_post(char *          line,
 
       switch (account_total.type()) {
       case value_t::AMOUNT:
-        diff -= account_total.as_amount();
+        if (account_total.as_amount().commodity_ptr() == diff.commodity_ptr())
+          diff -= account_total.as_amount();
         break;
 
       case value_t::BALANCE:
@@ -1675,24 +1677,36 @@ post_t * instance_t::parse_post(char *          line,
         break;
       }
 
-      amount_t tot = amt - diff;
-
       DEBUG("post.assign",
             "line " << context.linenum << ": " << "diff = " << diff);
       DEBUG("textual.parse", "line " << context.linenum << ": "
             << "POST assign: diff = " << diff);
 
-      if (! diff.is_zero()) {
-        if (! post->amount.is_null()) {
-          diff -= post->amount;
-          if (! no_assertions && ! diff.is_zero())
-            throw_(parse_error,
-                   _f("Balance assertion off by %1% (expected to see %2%)")
-                   % diff % tot);
-        } else {
+      // Subtract amounts from previous posts to this account in the xact.
+      for (post_t* p : xact->posts) {
+        if (p->account == post->account &&
+            p->amount.commodity_ptr() == diff.commodity_ptr()) {
+          diff -= p->amount;
+          DEBUG("textual.parse", "line " << context.linenum << ": "
+                << "Subtract " << p->amount << ", diff = " << diff);
+        }
+      }
+
+      if (post->amount.is_null()) {
+        // balance assignment
+        if (! diff.is_zero()) {
           post->amount = diff;
           DEBUG("textual.parse", "line " << context.linenum << ": "
                 << "Overwrite null posting");
+        }
+      } else {
+        // balance assertion
+        diff -= post->amount;
+        if (! no_assertions && ! diff.is_zero()) {
+          amount_t tot = amt - diff;
+          throw_(parse_error,
+                  _f("Balance assertion off by %1% (expected to see %2%)")
+                  % diff % tot);
         }
       }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -303,8 +303,8 @@ void expr_t::token_t::next(std::istream& in, const parse_flags_t& pflags)
       kind = SLASH;
     } else {                    // terminal context
       // Read in the regexp
-      char buf[256];
-      READ_INTO_(in, buf, 255, c, length, c != '/');
+      char buf[4096];
+      READ_INTO_(in, buf, 4095, c, length, c != '/');
       if (c != '/')
         expected('/', c);
       in.get(c);

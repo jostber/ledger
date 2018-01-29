@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -496,7 +496,7 @@ inline T& downcast(U& object) {
 
 path resolve_path(const path& pathname);
 
-#if HAVE_REALPATH
+#ifdef HAVE_REALPATH
 extern "C" char * realpath(const char *, char resolved_path[]);
 #endif
 

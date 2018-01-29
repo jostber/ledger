@@ -23,8 +23,8 @@ and easy to use.
 
 ## For the Impatient
 
-I know, you just want to build and play.  If you have all the dependencies
-installed (see below), then simply do this:
+I know, you just want to build and play.  If you have all the [dependencies](#dependencies)
+installed, then simply do this:
 
     $ git clone git://github.com/ledger/ledger.git
     $ cd ledger && ./acprep update  # Update to the latest, configure, make
@@ -35,8 +35,9 @@ Now try your first ledger command:
 
 For help on keeping your journal have a look at the
 [documentation] and the [wiki][] (Also see the “Resources” section at the
-end of this file). An emacs mode for ledger files can be found in the `lisp`
-directory and a vim plugin is located in the [ledger/vim-ledger repository].
+end of this file). An Emacs mode for Ledger files can be found in the
+[ledger/ledger-mode repository] and a vim plugin is located in the
+[ledger/vim-ledger repository].
 
 ## To the Rest
 
@@ -102,10 +103,6 @@ You can use [Homebrew] or [MacPorts] to install Ledger easily on OS X.
 You can see the parameters you can pass while installing with brew by the command `brew options ledger`. To install ledger, simply type the following command:
 
     $ brew install ledger
-    
-If everything worked well, you should have ledger working now. If you want to install this with python bindings, you can use the following command:
-
-    $ brew install ledger --with-python
 
 If you to want to startup python, use the following command:
 

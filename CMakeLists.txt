@@ -35,7 +35,6 @@ option(BUILD_DEBUG "Build support for runtime debugging" OFF)
 option(BUILD_LIBRARY "Build and install Ledger as a library" ON)
 option(BUILD_DOCS "Build and install documentation" OFF)
 option(BUILD_WEB_DOCS "Build version of documentation suitable for viewing online" OFF)
-option(BUILD_EMACSLISP "Build and install ledger-mode for Emacs" OFF)
 
 if (BUILD_DEBUG)
   set(CMAKE_BUILD_TYPE Debug)
@@ -93,6 +92,7 @@ include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CheckFunctionExists)
 include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CMakePushCheckState)
 
@@ -173,7 +173,7 @@ set(CMAKE_REQUIRED_INCLUDES
 set(CMAKE_REQUIRED_LIBRARIES
     ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROFILE_LIBS})
 
-check_cxx_source_runs("
+check_cxx_source_compiles("
 #include <boost/python.hpp>
 
 struct X { int y; };
@@ -181,9 +181,10 @@ struct X { int y; };
 int main()
 {
   boost::python::make_setter(&X::y);
-}" BOOST_MAKE_SETTER_RUNS)
+  return 0;
+}" BOOST_MAKE_SETTER_COMPILES)
 
-if (BOOST_MAKE_SETTER_RUNS)
+if (BOOST_MAKE_SETTER_COMPILES)
   set(HAVE_BOOST_159_ISSUE_39 0)
 else()
   set(HAVE_BOOST_159_ISSUE_39 1)
@@ -297,17 +298,13 @@ configure_file(
   ${PROJECT_SOURCE_DIR}/src/system.hh.in
   ${PROJECT_BINARY_DIR}/system.hh)
 
-if (CMAKE_CXX_COMPILER MATCHES "clang")
-  set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
-elseif(CMAKE_CXX_COMPILER MATCHES "g\\+\\+")
+if((CMAKE_CXX_COMPILER MATCHES "clang") OR
+   (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+"))
   set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 endif()
 
 add_subdirectory(src)
 add_subdirectory(doc)
-if (BUILD_EMACSLISP)
-  add_subdirectory(lisp)
-endif()
 add_subdirectory(test)
 
 ########################################################################

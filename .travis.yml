@@ -22,7 +22,7 @@ env:
       # _MIN is used when building the master branch
       # _MAX is used when building any other branch
     - BOOST_VERSION_MIN="1.49.0"
-    - BOOST_VERSION_MAX="1.60.0"
+    - BOOST_VERSION_MAX="1.61.0"
       # List of required boost libraries to build
     - BOOST_LIBS="date_time,filesystem,iostreams,python,regex,system,test"
       # List of required Homebrew formulae to install
@@ -47,6 +47,12 @@ matrix:
       # "boost::re_detail::perl_matcher<char const*, std::allocator<boost::sub_match<char const*> >, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::find()", referenced from:
       #     bool boost::regex_search<char const*, char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >(char const*, char const*, boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > > const&, boost::regex_constants::_match_flags) in main.cc.o
       #     bool boost::regex_search<char const*, char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >(char const*, char const*, boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > > const&, boost::regex_constants::_match_flags) in global.cc.o
+    - os: osx
+      compiler: clang
+      # On Mac OS X building ledger with clang fails due to
+      # dyld: Library not loaded: libboost_python.dylib
+      #   Referenced from: /Users/travis/build/ledger/ledger/ledger
+      #   Reason: image not found
 
 addons:
   coverity_scan:

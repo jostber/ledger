@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-#ifdef WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 // Implement strptime under windows
 
 #include "strptime.h"
@@ -21,6 +20,22 @@
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
+
+#if defined(__CYGWIN__)
+// Define strnicmp for Cygwin.
+#ifndef strcmpi
+#define strcmpi strcasecmp
+#endif
+#ifndef stricmp
+#define stricmp strcasecmp
+#endif
+#ifndef strncmpi
+#define strncmpi strncasecmp
+#endif
+#ifndef strnicmp
+#define strnicmp strncasecmp
+#endif
+#endif
 
 static const char* kWeekFull[] = {
   "Sunday", "Monday", "Tuesday", "Wednesday",
@@ -70,14 +85,14 @@ static char* _strptime(const char *s, const char *format, struct tm *tm) {
       case 'A':
         tm->tm_wday = -1;
         for (int i = 0; i < 7; ++i) {
-          len = static_cast<int>(strlen(kWeekAbbr[i]));
-          if (strnicmp(kWeekAbbr[i], s, len) == 0) {
+          len = static_cast<int>(strlen(kWeekFull[i]));
+          if (strnicmp(kWeekFull[i], s, len) == 0) {
             tm->tm_wday = i;
             break;
           }
 
-          len = static_cast<int>(strlen(kWeekFull[i]));
-          if (strnicmp(kWeekFull[i], s, len) == 0) {
+          len = static_cast<int>(strlen(kWeekAbbr[i]));
+          if (strnicmp(kWeekAbbr[i], s, len) == 0) {
             tm->tm_wday = i;
             break;
           }
@@ -92,14 +107,14 @@ static char* _strptime(const char *s, const char *format, struct tm *tm) {
       case 'h':
         tm->tm_mon = -1;
         for (int i = 0; i < 12; ++i) {
-          len = static_cast<int>(strlen(kMonthAbbr[i]));
-          if (strnicmp(kMonthAbbr[i], s, len) == 0) {
+          len = static_cast<int>(strlen(kMonthFull[i]));
+          if (strnicmp(kMonthFull[i], s, len) == 0) {
             tm->tm_mon = i;
             break;
           }
 
-          len = static_cast<int>(strlen(kMonthFull[i]));
-          if (strnicmp(kMonthFull[i], s, len) == 0) {
+          len = static_cast<int>(strlen(kMonthAbbr[i]));
+          if (strnicmp(kMonthAbbr[i], s, len) == 0) {
             tm->tm_mon = i;
             break;
           }
@@ -186,4 +201,4 @@ char* strptime(const char *buf, const char *fmt, struct tm *tm) {
   return _strptime(buf, fmt, tm);
 }
 
-#endif  // WIN32
+#endif  // _WIN32

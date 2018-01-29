@@ -1,5 +1,32 @@
                              Ledger NEWS
 
+* 3.1.2
+
+- Increased maximum length for regex from 255 to 4095 (bug #981).
+
+- Initialize periods from from/since clause rather than earliest
+  transaction date (bug #1159).
+
+- Check balance assertions against the amount after the posting (bug #1147).
+
+- Allow balance assertions with multiple posts to same account (bug #1187).
+
+- Fixed period duration of "every X days" and similar statements (bug #370).
+
+- Option --force-color does not require --color anymore (bug #1109).
+
+- Added quoted_rfc4180 to allow CVS output with RFC 4180 compliant quoting.
+
+- Python: Removed double quotes from Unicode values.
+
+- Emacs Lisp files have been moved to https://github.com/ledger/ledger-mode
+
+- Fixed build under MSYS (32-bit).
+
+- Fixed build under Cygwin.
+
+- Various documentation improvements
+
 * 3.1.1
 
 - Added a --no-revalued option

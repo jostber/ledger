@@ -1,11 +1,12 @@
 Tips for contributors
 ---------------------
 
-* Please **make pull requests against `next`, not `master`**.
-  Ledger follows a [git-flow] branching model,
-  in which development happens on the `next` branch and is subsequently merged into `master` for releases.
-* If you're making **changes to `ledger-mode`, or other files for which the Travis build is not
+* Please **make pull requests against `next`, not `master`**.  Ledger follows
+  a [git-flow] branching model, in which development happens on the `next`
+  branch and is subsequently merged into `master` for releases.
+* If you're making **changes to files for which the Travis build is not
   relevant**, please **add `[ci skip]` to the end of the commit message**.
+* Report bugs using [Bugzilla].  If you want, you can access the bug system using the lite (free) version of [Deskzilla]. 
 
 GLOSSARY
 ----
@@ -82,8 +83,6 @@ orientation:
 
 **./lib/**: a couple of libraries used in development.
 
-**./lisp/**: the [Emacs][] [ledger-mode] lisp code, under the [GPLv2] license.
-
 **./python/**:  samples using the Python ledger module.
 
 **./src/**:  the C++ header and source files in a flat directory.
@@ -93,8 +92,35 @@ orientation:
 **./tools/**:  an accretion of tools, mostly small scripts, to aid development
 
 
+Building
+---
+
+If you are going to be working on Ledger, you'll want to enable both debug
+builds (which are the default, using `acprep`), and also the use of
+pre-compiled headers.  To do this, specify your compiler as either `clang++`
+or `g++` as follows:
+
+    mkdir build
+    ./acprep --compiler=clang++
+    cd build
+    make
+
+This will set up a debug build using clang++ (and pre-compiled headers, which
+is enabled by the combination of those two), and then start a build.
+
+For even quicker rebuilds, try the Ninja build tool, which is very fast at
+determining what to rebuild, and automatically takes advantage of multiple
+cores:
+
+    mkdir build
+    ./acprep --compiler=clang++ --ninja
+    cd build
+    ninja
+
 [Boost]: http://boost.org
 [Boost.Python]: http://www.boost.org/libs/python/
+[Bugzilla]: http://bugs.ledger-cli.org/
+[Deskzilla]: http://almworks.com/deskzilla/download.html
 [GMP]: http://gmplib.org/
 [MPFR]: http://www.mpfr.org/
 [Cheetah]: http://www.cheetahtemplate.org
@@ -110,7 +136,4 @@ orientation:
 [small badge]: https://img.shields.io/travis/ledger/ledger/master.svg?&style=flat
 [git-flow]: http://nvie.com/posts/a-successful-git-branching-model/
 [README.md]: https://github.com/ledger/ledger/blob/master/README.md
-[Emacs]: http://www.gnu.org/software/emacs/
-[ledger-mode]: http://ledger-cli.org/3.0/doc/ledger-mode.html
-[GPLv2]: http://www.gnu.org/licenses/gpl-2.0.html
 [clang]: http://clang.llvm.org

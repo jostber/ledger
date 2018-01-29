@@ -1,4 +1,4 @@
-.Dd March 23, 2012
+.Dd February 16, 2017
 .Dt LEDGER 1
 .Os
 .Sh NAME
@@ -6,8 +6,8 @@
 .Nd Command-line, double-entry account reporting tool
 .Sh SYNOPSIS
 .Nm
-.Op Ar command
 .Op Ar options
+.Op Ar command
 .Op Ar arguments
 .Sh DESCRIPTION
 .Nm
@@ -111,9 +111,8 @@ The synonym
 is also accepted.
 .It Ic emacs Oo Ar query Oc
 Output posting and transaction data in a format readily consumed by the Emacs
-editor, in a series of Lisp forms.  This is used by the
-.Pa ledger.el
-Emacs mode to process reporting data from
+editor, in a series of Lisp forms.  This is used by the Emacs ledger-mode to
+process reporting data from
 .Nm .
 .It Ic equity Oo Ar report-query Oc
 Print a transaction with a series of postings that balance current totals for
@@ -1284,6 +1283,10 @@ for values that have a per-unit cost.
 Surround
 .Ar expression
 with double-quotes.
+.It Fn quoted_rfc4180 expression
+Surround
+.Ar expression
+with double-quotes, compatible with rfc 4180.
 .It Sy real
 .\" Is there a difference between real and actual?
 Return true if the transaction is real, i.e not a automated or virtual

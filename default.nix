@@ -2,12 +2,16 @@
 , texinfo, gnused }:
 
 let
-  rev = "20141005";
+  version = "3.1.1";
+  rev = "20161114";
 in
 
 stdenv.mkDerivation {
-  name = "ledger-3.1.0.${rev}";
-  src = builtins.filterSource (path: type: type != "unknown") ./.;
+  name = "ledger-${version}-${rev}";
+
+  # NOTE: fetchgit because ledger has submodules not included in the
+  # default github tarball.
+  src = ./.;
 
   buildInputs = [ cmake boost gmp mpfr libedit python texinfo gnused ];
 
@@ -20,10 +24,12 @@ stdenv.mkDerivation {
     cp -v "$src/lisp/"*.el $out/share/emacs/site-lisp/
   '';
 
+  cmakeFlags = [ "-DCMAKE_INSTALL_LIBDIR=lib" ];
+
   meta = {
     homepage = "http://ledger-cli.org/";
     description = "A double-entry accounting system with a command-line reporting interface";
-    license = "BSD";
+    license = stdenv.lib.licenses.bsd3;
 
     longDescription = ''
       Ledger is a powerful, double-entry accounting system that is accessed
@@ -33,6 +39,6 @@ stdenv.mkDerivation {
     '';
 
     platforms = stdenv.lib.platforms.all;
-    maintainers = with stdenv.lib.maintainers; [ simons the-kenny jwiegley ];
+    maintainers = with stdenv.lib.maintainers; [ the-kenny jwiegley ];
   };
 }

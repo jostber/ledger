@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016, John Wiegley.  All rights reserved.
+ * Copyright (c) 2003-2018, John Wiegley.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ std::size_t session_t::read_data(const string& master_account)
       file = path(home_var) / ".ledger";
 
     if (! file.empty() && exists(file))
-      HANDLER(file_).data_files.push_back(file);
+      HANDLER(file_).data_files.insert(file);
     else
       throw_(parse_error, "No journal file was specified (please use -f)");
 
@@ -214,7 +214,7 @@ journal_t * session_t::read_journal_files()
 journal_t * session_t::read_journal(const path& pathname)
 {
   HANDLER(file_).data_files.clear();
-  HANDLER(file_).data_files.push_back(pathname);
+  HANDLER(file_).data_files.insert(pathname);
 
   return read_journal_files();
 }
@@ -284,7 +284,7 @@ value_t session_t::fn_str(call_scope_t& args)
 
 value_t session_t::fn_lot_price(call_scope_t& args)
 {
-  amount_t amt(args.get<amount_t>(1, false));
+  amount_t amt(args.get<amount_t>(0, false));
   if (amt.has_annotation() && amt.annotation().price)
     return *amt.annotation().price;
   else
@@ -292,7 +292,7 @@ value_t session_t::fn_lot_price(call_scope_t& args)
 }
 value_t session_t::fn_lot_date(call_scope_t& args)
 {
-  amount_t amt(args.get<amount_t>(1, false));
+  amount_t amt(args.get<amount_t>(0, false));
   if (amt.has_annotation() && amt.annotation().date)
     return *amt.annotation().date;
   else
@@ -300,7 +300,7 @@ value_t session_t::fn_lot_date(call_scope_t& args)
 }
 value_t session_t::fn_lot_tag(call_scope_t& args)
 {
-  amount_t amt(args.get<amount_t>(1, false));
+  amount_t amt(args.get<amount_t>(0, false));
   if (amt.has_annotation() && amt.annotation().tag)
     return string_value(*amt.annotation().tag);
   else
