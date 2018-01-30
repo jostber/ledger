@@ -140,6 +140,15 @@ Or, for Ubuntu 12.04:
          libboost-filesystem-dev libboost-python-dev texinfo lcov \
          sloccount libboost-iostreams-dev libboost-test-dev
 
+### Slackware
+
+Installation in Slackware 14.2 is straightforward if you use sbopkg 
+to install slackbuilds
+
+    $ sudo sbopkg -i ledger
+
+The dependency will then also be installed.
+
 ### Debian
 
 Debian squeeze (6.0): the version of boost in squeeze is too old
